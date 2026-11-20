@@ -6,14 +6,16 @@ using Random = UnityEngine.Random;
 public class Bullet : MonoBehaviour{
     const float PASS_THROUGH_TIME = 0.05f;
     
-    [BoxGroup("References")][Required][SerializeField] Movement movement;
+    [BoxGroup("References")][Required][SerializeField] Rigidbody2D rb;
 
+    [SerializeField] float velocity = 500;
     [SerializeField] int maxBounces = 2;
     [SerializeField] float damage = 1;
     [SerializeField] float lifetime = 10;
     
     int bounces = 0;
     float startTime;
+    Vector2 dir;
 
     void Awake(){
         Destroy(gameObject, lifetime);
@@ -21,21 +23,9 @@ public class Bullet : MonoBehaviour{
     }
 
     void Start(){
-        movement.SetMovementInput(transform.up);
+        dir = transform.up;
+        rb.linearVelocity = dir * velocity;
     }
-
-    // void OnTriggerEnter2D(Collider2D other){
-    //     if (Time.time - startTime < PASS_THROUGH_TIME){
-    //         return;
-    //     }
-    //     if (bounces >= maxBounces){
-    //         Destroy(gameObject);
-    //     }
-    //     var newDirection = Vector2.Reflect(movement.MovementInput, other.transform.position - transform.position);
-    //     movement.SetMovementInput(newDirection);
-    //     bounces++;
-    // }
-
 
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -50,8 +40,8 @@ public class Bullet : MonoBehaviour{
             Destroy(gameObject);
         }
         Debug.DrawRay(firstContact.point, firstContact.normal * 100, Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f), 10f);
-        var newDirection = Vector2.Reflect(movement.MovementInput, firstContact.normal);
-        movement.SetMovementInput(newDirection);
+        dir = Vector2.Reflect(dir, firstContact.normal);
+        rb.linearVelocity = dir * velocity;
         bounces++;
     }
 }

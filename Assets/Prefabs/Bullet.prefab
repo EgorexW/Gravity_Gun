@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6490456793803880259
 Transform:
   m_ObjectHideFlags: 0
@@ -157,8 +157,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa958f93b126242b2ac54347e8b86a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  movement: {fileID: 7139396525095967915}
+  rb: {fileID: 1957946732559603565}
+  velocity: 5
   maxBounces: 2
+  damage: 1
   lifetime: 10
 --- !u!1 &8867328978211310165
 GameObject:
