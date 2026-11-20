@@ -13,8 +13,9 @@
 - [ ] Score counter
   - [ ] UI
 - [x] Kenney Assets
-- [ ] Gravity Field
-- [ ] Arena
+- [X] Gravity Field
+- [x] Arena
+- [ ] Polish (The TODOs)
 
 # Task
 
