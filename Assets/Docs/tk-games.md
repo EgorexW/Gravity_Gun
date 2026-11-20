@@ -15,8 +15,6 @@
 - [x] Kenney Assets
 - [ ] Gravity Field
 - [ ] Arena
-- [ ] Polish
-  - [ ] Bouncing on corners
 
 # Task
 

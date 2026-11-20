@@ -11,7 +11,8 @@ public class InputHandler : MonoBehaviour
 
     [FormerlySerializedAs("characterMovement")] [BoxGroup("References")] [Required] [SerializeField] Movement movement;
     [BoxGroup("References")] [Required] [SerializeField] Looking looking;
-    [BoxGroup("References")] [Required] [SerializeField] Gun gun; // TODO should't reference gun personally
+    [BoxGroup("References")] [Required] [SerializeField] Gun gun;
+    [BoxGroup("References")][Required][SerializeField] GravityBend bend;
 
     void Awake()
     {
@@ -33,10 +34,17 @@ public class InputHandler : MonoBehaviour
             case "Shoot":
                 OnShootPerformed(obj);
                 break;
+            case "Pull":
+                OnPullPerformed(obj);
+                break;
             default:
                 Debug.LogWarning("Unhandled action: " + obj.action.name);
                 break;
         }
+    }
+
+    void OnPullPerformed(InputAction.CallbackContext callbackContext){
+        bend.active = callbackContext.performed;
     }
 
     void OnShootPerformed(InputAction.CallbackContext obj){

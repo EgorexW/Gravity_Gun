@@ -8,14 +8,14 @@ public class Bullet : MonoBehaviour{
     
     [BoxGroup("References")][Required][SerializeField] Rigidbody2D rb;
 
-    [SerializeField] float velocity = 500;
+    [SerializeField] float velocity = 10;
     [SerializeField] int maxBounces = 2;
     [SerializeField] float damage = 1;
     [SerializeField] float lifetime = 10;
     
     int bounces = 0;
     float startTime;
-    Vector2 dir;
+    // Vector2 dir;
 
     void Awake(){
         Destroy(gameObject, lifetime);
@@ -23,8 +23,7 @@ public class Bullet : MonoBehaviour{
     }
 
     void Start(){
-        dir = transform.up;
-        rb.linearVelocity = dir * velocity;
+        rb.linearVelocity = transform.up * velocity;
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -39,9 +38,14 @@ public class Bullet : MonoBehaviour{
         if (bounces >= maxBounces){
             Destroy(gameObject);
         }
-        Debug.DrawRay(firstContact.point, firstContact.normal * 100, Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f), 10f);
-        dir = Vector2.Reflect(dir, firstContact.normal);
+        // Debug.DrawRay(firstContact.point, firstContact.normal * 100, Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f), 10f);
+        var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, firstContact.normal); // TODO still does not work perfectly on corners
         rb.linearVelocity = dir * velocity;
         bounces++;
+    }
+
+    public void Pull(Vector2 pull){
+        Debug.DrawRay(transform.position, pull * 100, Color.red, 0.1f);
+        rb.linearVelocity = pull + rb.linearVelocity;
     }
 }

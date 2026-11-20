@@ -161,7 +161,7 @@ MonoBehaviour:
   velocity: 5
   maxBounces: 2
   damage: 1
-  lifetime: 10
+  lifetime: 30
 --- !u!1 &8867328978211310165
 GameObject:
   m_ObjectHideFlags: 0
