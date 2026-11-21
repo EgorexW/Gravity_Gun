@@ -36,6 +36,7 @@ List<Target> targets = new List<Target>();
     void OnTargetDestroyed(Target target){
         targets.Remove(target);
         UpdateTargets();
+        onTargetDestroyed.Invoke();
     }
 
     Vector2 SelectTargetPos(){

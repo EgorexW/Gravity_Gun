@@ -10,8 +10,8 @@
   - [x] Bouncing
 - [x] Targets
   - [x] Spawning more
-- [ ] Score counter
-  - [ ] UI
+- [x] Score counter
+  - [x] UI
 - [x] Kenney Assets
 - [X] Gravity Field
 - [x] Arena
