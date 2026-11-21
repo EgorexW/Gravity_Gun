@@ -1,11 +1,15 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GravityBend : MonoBehaviour{
     [SerializeField] float strength = 2;
     [SerializeField] float range = 5;
 
     public bool active;
+
+    [FoldoutGroup("Events")] public UnityEvent<Vector2> onHold = new();
 
     void Update(){
         if (active){
@@ -27,5 +31,7 @@ public class GravityBend : MonoBehaviour{
                 
             bullet.Pull(pull);
         }
+        
+        onHold.Invoke(pos);
     }
 }
