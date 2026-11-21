@@ -1,14 +1,16 @@
 using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class Bullet : MonoBehaviour{
     const float PASS_THROUGH_TIME = 0.05f;
+    const float STOPPED_MAGNITUDE = 0.1f;
     
     [BoxGroup("References")][Required][SerializeField] Rigidbody2D rb;
 
-    [SerializeField] float velocity = 10;
+    [FormerlySerializedAs("velocity")] [SerializeField] float speed = 10;
     [SerializeField] int maxBounces = 2;
     [SerializeField] float damage = 1;
     [SerializeField] float lifetime = 10;
@@ -23,7 +25,13 @@ public class Bullet : MonoBehaviour{
     }
 
     void Start(){
-        rb.linearVelocity = transform.up * velocity;
+        rb.linearVelocity = transform.up * speed;
+    }
+
+    void Update(){
+        if (rb.linearVelocity.magnitude <= STOPPED_MAGNITUDE){
+            Destroy(gameObject);
+        }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -40,7 +48,8 @@ public class Bullet : MonoBehaviour{
         }
         // Debug.DrawRay(firstContact.point, firstContact.normal * 100, Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f), 10f);
         var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, firstContact.normal); // TODO still does not work perfectly on corners
-        rb.linearVelocity = dir * velocity;
+        transform.up = dir;
+        rb.linearVelocity = transform.up * speed;
         bounces++;
     }
 

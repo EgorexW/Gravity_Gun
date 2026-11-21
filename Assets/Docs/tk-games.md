@@ -9,7 +9,7 @@
 - [x] Shooting
   - [x] Bouncing
 - [x] Targets
-  - [ ] Spawning more
+  - [x] Spawning more
 - [ ] Score counter
   - [ ] UI
 - [x] Kenney Assets
