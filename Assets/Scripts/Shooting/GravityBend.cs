@@ -14,7 +14,7 @@ public class GravityBend : MonoBehaviour{
 
     [FoldoutGroup("Events")] public UnityEvent<Vector2> onHold = new();
 
-    void Update(){
+    void FixedUpdate(){
         if (active){
             Hold();
         }
@@ -30,8 +30,8 @@ public class GravityBend : MonoBehaviour{
                 continue;
             }
             var dir = pos - (Vector2)bullet.transform.position;
-            var mult = Mathf.InverseLerp(0,  range, dir.magnitude);
-            var pullValue = strength * mult * Time.deltaTime;
+            var mult = 1 - Mathf.InverseLerp(0,  range, dir.magnitude);
+            var pullValue = strength * mult * Time.fixedDeltaTime;
             var pull = pullValue * dir.normalized;
                 
             bullet.Pull(pull);

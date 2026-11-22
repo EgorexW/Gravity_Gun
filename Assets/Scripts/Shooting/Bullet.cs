@@ -10,7 +10,7 @@ public class Bullet : MonoBehaviour{
     
     [BoxGroup("References")][Required][SerializeField] Rigidbody2D rb;
 
-    [FormerlySerializedAs("velocity")] [SerializeField] float speed = 10;
+    [FormerlySerializedAs("speed")] [FormerlySerializedAs("velocity")] [SerializeField] float startSpeed = 10;
     [SerializeField] int maxBounces = 2;
     [SerializeField] float damage = 1;
     [SerializeField] float lifetime = 10;
@@ -25,7 +25,7 @@ public class Bullet : MonoBehaviour{
     }
 
     void Start(){
-        rb.linearVelocity = transform.up * speed;
+        rb.linearVelocity = transform.up * startSpeed;
     }
     
     void Update(){
@@ -57,7 +57,7 @@ public class Bullet : MonoBehaviour{
         if (collision.contactCount > 1){
         }
         var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, avgNormal);
-        rb.linearVelocity = dir.normalized * speed;
+        rb.linearVelocity = dir.normalized * collision.relativeVelocity.magnitude;
         bounces++;
     }
 
