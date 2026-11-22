@@ -1,0 +1,226 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using TMPro;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
+
+public static class General{
+    public const int Iterationlimit = 1000;
+
+    public static readonly Vector2[] MainDirections2D = { Vector2.right, Vector2.left, Vector2.up, Vector2.down };
+
+    public static readonly Vector3[] MainDirections3D = { Vector3.right, Vector3.left, Vector3.forward, Vector3.back };
+
+    public static float GetAngleFromVector(Vector2 dir){
+        dir = dir.normalized;
+        var angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        if (angle < 0){
+            angle += 360;
+        }
+        return angle;
+    }
+
+    public static Vector2 GetMousePos(){
+        return Mouse.current.position.ReadValue();
+    }
+
+    public static Vector2 GetMouseWorldPos(){
+        return GetMouseWorldPos(GetMousePos());
+    }
+
+    public static Vector2 GetMouseWorldPos(Vector2 mousePos){
+        if (Camera.main == null){
+            Debug.LogError("[General] GetMouseWorldPos: No main camera found in the scene.");
+            return Vector2.zero;
+        }
+        var pos = Camera.main.ScreenToWorldPoint(mousePos);
+        return pos;
+    }
+
+    public static Vector2 RandomPointOnCircle(){
+        var angle = Random.value * 2 * Mathf.PI;
+        return new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
+    }
+
+    public static string TimeToString(float nr){
+        var minutes = Mathf.FloorToInt(nr / 60);
+        var seconds = nr - minutes * 60;
+        seconds = Mathf.Round(seconds);
+        var text = minutes + ":" + seconds;
+        if (seconds < 10){
+            text = minutes + ":0" + seconds;
+        }
+        return text;
+    }
+
+    public static Vector2Int RoundVector(Vector2 pos){
+        return new Vector2Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y));
+    }
+
+    public static TComponent GetComponentFromCollider<TComponent>(Collider2D collider){
+        if (collider == null){
+            return default;
+        }
+        return !collider.TryGetComponent(out TComponent component2) ? default : component2;
+    }
+
+    public static TComponent GetComponentFromCollider<TComponent>(Collider collider){
+        if (collider == null){
+            return default;
+        }
+        return !collider.TryGetComponent(out TComponent component2) ? default : component2;
+    }
+
+    static GameObject GetGameObjectFromCollider(Component collider){
+        return collider == null ? null : collider.gameObject;
+    }
+
+    public static void WorldText(string text, Vector2 pos, float size, float time = 0.01f){
+        WorldText(text, pos, size, time, Color.white);
+    }
+
+    public static void WorldText(string text, Vector2 pos, float size, float time, Color color){
+        var gameObject = new GameObject("WorldText"){
+            transform ={
+                position = pos
+            }
+            // hideFlags = HideFlags.HideInHierarchy
+        };
+        var textMeshPro = gameObject.AddComponent<TextMeshPro>();
+        textMeshPro.color = color;
+        textMeshPro.text = text;
+        textMeshPro.fontSize = size;
+        textMeshPro.alignment = TextAlignmentOptions.Center;
+        Object.Destroy(gameObject, time);
+    }
+
+    public static Vector2 GetClosestPos(Vector2 centerPos, List<Vector2> poses){
+        var closestPos = Vector2.zero;
+        var smallestDis = Mathf.Infinity;
+        foreach (var pos in poses){
+            var dis = Vector2.Distance(centerPos, pos);
+            if (dis < smallestDis){
+                smallestDis = dis;
+                closestPos = pos;
+            }
+        }
+        return closestPos;
+    }
+
+    public static Vector2 GetClosestPos(Vector3 transformPosition, List<GameObject> enemies){
+        var poses = enemies.ConvertAll(input => (Vector2)input.transform.position);
+        return GetClosestPos(transformPosition, poses);
+    }
+
+    public static bool IsMouseOverUI(){
+        return EventSystem.current.IsPointerOverGameObject();
+    }
+
+    public static Quaternion RotateLeftOrRight(Quaternion rotation, Quaternion targetRotation, float delta){
+        var flatDefaultRotation = Quaternion.Euler(0, targetRotation.eulerAngles.y, 0);
+        return Quaternion.RotateTowards(rotation, flatDefaultRotation, delta);
+    }
+
+    public static Collider[] OverlapBounds(Bounds bounds){
+        var result = Physics.OverlapBox(bounds.center, bounds.extents);
+        return result;
+    }
+
+    public static List<T> GetComponentsFromColliders<T>(Collider[] colliders){
+        var components = new List<T>();
+        foreach (var collider in colliders){
+            var component = GetComponentFromCollider<T>(collider);
+            if (component != null){
+                components.Add(component);
+            }
+        }
+        return components;
+    }
+
+    public static Vector2 RandomPointInsideCollider2D(Collider2D collider2D){
+        Vector2 pos = collider2D.bounds.center;
+        for (var i = 0; i < Iterationlimit; i++){
+            var posTmp = new Vector2(
+                Random.Range(collider2D.bounds.min.x, collider2D.bounds.max.x),
+                Random.Range(collider2D.bounds.min.y, collider2D.bounds.max.y)
+            );
+            if (!collider2D.OverlapPoint(posTmp)){
+                continue;
+            }
+            pos = posTmp;
+            break;
+        }
+        return pos;
+    }
+
+    public static List<T> GetComponentsFromColliders<T>(Collider2D[] colliders){
+        var components = new List<T>();
+        foreach (var collider in colliders){
+            var component = GetComponentFromCollider<T>(collider);
+            if (component != null){
+                components.Add(component);
+            }
+        }
+        return components;
+    }
+
+    public static string EnumDescription<T>() where T : Enum{
+        var sb = new StringBuilder();
+
+        // Detect if this Enum is using the [Flags] attribute
+        var isFlag = typeof(T).IsDefined(typeof(FlagsAttribute), false);
+
+        // Using basic Rich Text to bold the header
+        sb.AppendLine(isFlag ? "<b>List Index ➔ Name</b>" : "<b>Index ➔ Name</b>");
+
+        foreach (T value in Enum.GetValues(typeof(T))){
+            var rawValue = Convert.ToInt32(value);
+
+            if (isFlag){
+                if (rawValue == 0){
+                    sb.AppendLine($"[--] {value}");
+                }
+                else if ((rawValue & (rawValue - 1)) == 0){
+                    var listIndex = (int)Math.Log(rawValue, 2);
+                    sb.AppendLine($"[{listIndex}] {value}");
+                }
+            }
+            else{
+                // Standard Enum behavior
+                sb.AppendLine($"[{rawValue}] {value}");
+            }
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
+    /// <summary>
+    ///     Checks if the pointer is over any UI element that should block clicks.
+    ///     UI elements with the IIgnorePointerOverUI component will not block clicks.
+    /// </summary>
+    public static bool IsPointerOverUI(){
+        if (!EventSystem.current.IsPointerOverGameObject()){
+            return false;
+        }
+
+        var eventData = new PointerEventData(EventSystem.current){
+            position = Mouse.current != null ? Mouse.current.position.ReadValue() : Input.mousePosition
+        };
+
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+
+        foreach (var result in results)
+            // If the hit UI object does NOT have the IIgnorePointerOverUI component,
+            // then it's a valid UI element that should block the click.
+            if (result.gameObject.GetComponentInParent<IIgnorePointerOverUI>() == null){
+                return true;
+            }
+
+        return false;
+    }
+}
