@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 public class GravityBend : MonoBehaviour{
-    static int BulletsLayer => LayerMask.NameToLayer("Bullets");
+    static int BulletsLayer => LayerMask.GetMask("Bullets");
     
     [SerializeField] float strength = 2;
     [SerializeField] float range = 5;

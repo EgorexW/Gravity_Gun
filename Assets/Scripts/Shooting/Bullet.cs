@@ -27,11 +27,12 @@ public class Bullet : MonoBehaviour{
     void Start(){
         rb.linearVelocity = transform.up * speed;
     }
-
+    
     void Update(){
-        if (rb.linearVelocity.magnitude <= STOPPED_MAGNITUDE){
-            Destroy(gameObject);
-        }
+        transform.up = rb.linearVelocity.normalized;
+    //     if (rb.linearVelocity.magnitude <= STOPPED_MAGNITUDE){
+    //         Destroy(gameObject);
+    //     }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -56,8 +57,7 @@ public class Bullet : MonoBehaviour{
         if (collision.contactCount > 1){
         }
         var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, avgNormal);
-        transform.up = dir;
-        rb.linearVelocity = transform.up * speed;
+        rb.linearVelocity = dir.normalized * speed;
         bounces++;
     }
 

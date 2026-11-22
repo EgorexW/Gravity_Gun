@@ -185,6 +185,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Damageable
   health: 1
+  onDie:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &6264121244931397081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,6 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a71cf8fcd85f4fae9e5fec408dc4748b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Target
+  damageable: {fileID: 8625004509620631956}
   onDestroy:
     m_PersistentCalls:
       m_Calls: []
