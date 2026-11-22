@@ -39,15 +39,23 @@ public class Bullet : MonoBehaviour{
         if (Time.time - startTime < PASS_THROUGH_TIME){
             return;
         }
-        var firstContact = collision.contacts[0]; // TODO edge cases with multiple contacts
-        if (firstContact.collider.gameObject.TryGetComponent<Damageable>(out var damageable)){
-            damageable.Damage(damage);
+        var avgNormal = Vector2.zero;
+        bool damaged = false;
+        foreach (var contact in collision.contacts){
+            if (!damaged && contact.collider.gameObject.TryGetComponent<Damageable>(out var damageable)){
+                damageable.Damage(damage);
+                damaged = true;
+            }
+            avgNormal += contact.normal;
         }
+        avgNormal.Normalize();
         if (bounces >= maxBounces){
             Destroy(gameObject);
+            return;
         }
-        // Debug.DrawRay(firstContact.point, firstContact.normal * 100, Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f), 10f);
-        var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, firstContact.normal); // TODO still does not work perfectly on corners
+        if (collision.contactCount > 1){
+        }
+        var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, avgNormal); // TODO still does not work perfectly on corners
         transform.up = dir;
         rb.linearVelocity = transform.up * speed;
         bounces++;
