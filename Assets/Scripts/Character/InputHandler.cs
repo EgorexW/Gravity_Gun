@@ -1,3 +1,4 @@
+using System;
 using Nrjwolf.Tools.AttachAttributes;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -17,6 +18,10 @@ public class InputHandler : MonoBehaviour
     void Awake()
     {
         playerInput.onActionTriggered += OnActionTriggered;
+    }
+
+    void Update(){
+        bend.pos = General.GetMouseWorldPos();
     }
 
     void OnActionTriggered(InputAction.CallbackContext obj)

@@ -15,7 +15,8 @@
 - [x] Kenney Assets
 - [X] Gravity Field
 - [x] Arena
-- [ ] Polish (The TODOs)
+- [X] Polish (The TODOs)
+- [] Post Mortem
 
 # Task
 

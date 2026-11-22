@@ -55,7 +55,7 @@ public class Bullet : MonoBehaviour{
         }
         if (collision.contactCount > 1){
         }
-        var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, avgNormal); // TODO still does not work perfectly on corners
+        var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, avgNormal);
         transform.up = dir;
         rb.linearVelocity = transform.up * speed;
         bounces++;
