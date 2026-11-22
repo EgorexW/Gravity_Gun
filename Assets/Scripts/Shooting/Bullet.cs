@@ -51,7 +51,6 @@ public class Bullet : MonoBehaviour{
             Destroy(gameObject);
             return;
         }
-        if (collision.contactCount > 1){ }
         var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, avgNormal);
         rb.linearVelocity = dir.normalized * collision.relativeVelocity.magnitude;
         bounces++;
