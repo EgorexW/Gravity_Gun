@@ -1,17 +1,16 @@
-using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class TargetsManager : MonoBehaviour{
-    [BoxGroup("References")][Required][SerializeField] GameObject targetPrefab;
+    [BoxGroup("References")] [Required] [SerializeField] GameObject targetPrefab;
     [BoxGroup("References")] [Required] [SerializeField] Collider2D spawnBounds;
-    
+
     [SerializeField] int targetCount = 10;
     [SerializeField] float collisionCheckSize = 2f;
 
-List<Target> targets = new List<Target>();
+    readonly List<Target> targets = new();
 
     [FoldoutGroup("Events")] public UnityEvent onTargetDestroyed = new();
 
@@ -20,9 +19,7 @@ List<Target> targets = new List<Target>();
     }
 
     void UpdateTargets(){
-        while (targets.Count < targetCount){
-            CreateTarget();
-        }
+        while (targets.Count < targetCount) CreateTarget();
     }
 
     void CreateTarget(){

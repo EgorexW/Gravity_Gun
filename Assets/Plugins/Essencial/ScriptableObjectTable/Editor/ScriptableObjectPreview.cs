@@ -1,382 +1,349 @@
-using UnityEditor;
-using UnityEngine;
-using UnityEngine.UIElements;
-using UnityEditor.UIElements;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System;
-namespace EnlitGames.ScriptableObjectTable
-{
-    public class ScriptableObjectPreview : EditorWindow
-    {
-        static Color greyBackgroundColor = new Color(0.16f, 0.16f, 0.16f);
-        static Color defaultBackgroundColor = new Color(0.2f, 0.2f, 0.2f);
+using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine;
+using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
+
+namespace EnlitGames.ScriptableObjectTable{
+    public class ScriptableObjectPreview : EditorWindow{
+        static readonly Color greyBackgroundColor = new(0.16f, 0.16f, 0.16f);
+        static readonly Color defaultBackgroundColor = new(0.2f, 0.2f, 0.2f);
         static ScriptableObject selectedScriptableObject;
-        static bool showWarningForUndisplayedFields = false;
-        static bool hideReadOnlyFields = false;
+        static bool showWarningForUndisplayedFields;
+        static bool hideReadOnlyFields;
         bool scale_swap = true;
-        
+
         [MenuItem("Window/Scriptable Object Table")]
-        public static void ShowExample()
-        {
+        public static void ShowExample(){
             var wnd = GetWindow<ScriptableObjectPreview>();
             wnd.titleContent = new GUIContent("Scriptable Object Table");
         }
 
-        public void CreateGUI()
-        {
+        public void CreateGUI(){
             showWarningForUndisplayedFields = false;
-            VisualElement root = rootVisualElement;
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Plugins/ScriptableObjectTable/Editor/ScriptableObjectPreview.uxml");
+            var root = rootVisualElement;
+            var visualTree =
+                AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+                    "Assets/Plugins/ScriptableObjectTable/Editor/ScriptableObjectPreview.uxml");
             VisualElement ScriptableObjectTable = visualTree.Instantiate();
             root.Add(ScriptableObjectTable);
-            
+
 
             ObjectField ScriptableObjectSelection = root.Query<ObjectField>("ScriptableObjectSelection");
-            ScriptableObjectSelection.RegisterValueChangedCallback((evt) => { PopulateTable((ScriptableObject)evt.newValue); });
+            ScriptableObjectSelection.RegisterValueChangedCallback(evt => {
+                PopulateTable((ScriptableObject)evt.newValue);
+            });
             ScriptableObjectSelection.value = selectedScriptableObject;
 
             Toggle HideReadOnlyFields = root.Query<Toggle>("HideReadOnlyFields");
-            HideReadOnlyFields.RegisterValueChangedCallback((evt) => { HideReadOnlyFieldsToggled(evt.newValue); });
+            HideReadOnlyFields.RegisterValueChangedCallback(evt => { HideReadOnlyFieldsToggled(evt.newValue); });
             HideReadOnlyFields.value = hideReadOnlyFields;
-            
         }
 
-        void HideReadOnlyFieldsToggled(bool newValue)
-        {
+        void HideReadOnlyFieldsToggled(bool newValue){
             hideReadOnlyFields = newValue;
             PopulateTable(selectedScriptableObject);
             ForceUpdateScrollViewScale();
         }
 
-        void PopulateTable(ScriptableObject newSelectedScriptableObject)
-        {
-            VisualElement root = rootVisualElement;
+        void PopulateTable(ScriptableObject newSelectedScriptableObject){
+            var root = rootVisualElement;
             VisualElement scrollview = root.Query<ScrollView>("scroll-view-wrap-example");
             scrollview.Clear();
-            if (newSelectedScriptableObject != null)
-            {
-                ScriptableObject scriptableObject = (ScriptableObject)newSelectedScriptableObject;
+            if (newSelectedScriptableObject != null){
+                var scriptableObject = newSelectedScriptableObject;
                 selectedScriptableObject = scriptableObject;
                 ShowSelectedScriptableObject(scriptableObject, scrollview);
             }
         }
 
-        void ShowSelectedScriptableObject(ScriptableObject scriptableObject, VisualElement scrollview)
-        {
-            List<ScriptableObjectData> scriptableObjectDataList = GetScriptableObjectDataList(scriptableObject);
+        void ShowSelectedScriptableObject(ScriptableObject scriptableObject, VisualElement scrollview){
+            var scriptableObjectDataList = GetScriptableObjectDataList(scriptableObject);
 
-            float pathColumnWidth = ColumnWidthCalculator.FindScriptableObjectPathColumnWidth(scriptableObjectDataList);
-            List<float> columnWidths = ColumnWidthCalculator.FindColumnWidths(scriptableObjectDataList);
-            
-            if(showWarningForUndisplayedFields)
-            {
+            var pathColumnWidth = ColumnWidthCalculator.FindScriptableObjectPathColumnWidth(scriptableObjectDataList);
+            var columnWidths = ColumnWidthCalculator.FindColumnWidths(scriptableObjectDataList);
+
+            if (showWarningForUndisplayedFields){
                 ShowWarningForUndisplayedFields();
             }
-            else HideWarningForUndisplayedFields();
+            else{
+                HideWarningForUndisplayedFields();
+            }
 
             ShowHeader(scriptableObjectDataList[0], scrollview, pathColumnWidth, columnWidths);
-            for(int i = 0; i < scriptableObjectDataList.Count; i++)
-            {
-                bool colorRowGrey = i % 2 == 0;
-                ShowScriptableObjectInstance(scriptableObjectDataList[i], scrollview, pathColumnWidth, columnWidths, colorRowGrey);
+            for (var i = 0; i < scriptableObjectDataList.Count; i++){
+                var colorRowGrey = i % 2 == 0;
+                ShowScriptableObjectInstance(scriptableObjectDataList[i], scrollview, pathColumnWidth, columnWidths,
+                    colorRowGrey);
             }
         }
-        
-        void ShowWarningForUndisplayedFields()
-        {
+
+        void ShowWarningForUndisplayedFields(){
             Label warning = rootVisualElement.Query<Label>("Warning");
-            warning.text = "Some fields are not displayed because they are not serializable. You can make them serializable by adding the [SerializeField] attribute to them.";
+            warning.text =
+                "Some fields are not displayed because they are not serializable. You can make them serializable by adding the [SerializeField] attribute to them.";
         }
 
-        void HideWarningForUndisplayedFields()
-        {
+        void HideWarningForUndisplayedFields(){
             Label warning = rootVisualElement.Query<Label>("Warning");
             warning.text = "";
         }
 
-        void ShowHeader(ScriptableObjectData scriptableObjectData, VisualElement scrollview, float pathColumnWidth, List<float> columnWidths)
-        {
-            VisualElement headerRow = new VisualElement();
+        void ShowHeader(ScriptableObjectData scriptableObjectData, VisualElement scrollview, float pathColumnWidth,
+            List<float> columnWidths){
+            var headerRow = new VisualElement();
             headerRow.style.flexDirection = FlexDirection.Row;
             scrollview.Add(headerRow);
-            Label pathHeader = new Label("File Path");
+            var pathHeader = new Label("File Path");
             pathHeader.style.width = pathColumnWidth;
             headerRow.Add(pathHeader);
-            for(int i = 0; i < scriptableObjectData.fields.Count; i++)
-            {
-                
-                Label fieldHeader = new Label(scriptableObjectData.fields[i].Name);
+            for (var i = 0; i < scriptableObjectData.fields.Count; i++){
+                var fieldHeader = new Label(scriptableObjectData.fields[i].Name);
                 fieldHeader.style.width = columnWidths[i];
 
                 headerRow.Add(fieldHeader);
             }
         }
 
-        void ShowScriptableObjectInstance(ScriptableObjectData scriptableObjectData, VisualElement scrollview, float columnWidth, List<float> columnWidths, bool colorRowGrey)
-        {
-            VisualElement scriptableObjectInstanceRow = new VisualElement();
+        void ShowScriptableObjectInstance(ScriptableObjectData scriptableObjectData, VisualElement scrollview,
+            float columnWidth, List<float> columnWidths, bool colorRowGrey){
+            var scriptableObjectInstanceRow = new VisualElement();
             scriptableObjectInstanceRow.style.flexDirection = FlexDirection.Row;
             scrollview.Add(scriptableObjectInstanceRow);
-            Label pathLabel = new Label(scriptableObjectData.path);
-            if(colorRowGrey) 
+            var pathLabel = new Label(scriptableObjectData.path);
+            if (colorRowGrey){
                 pathLabel.style.backgroundColor = greyBackgroundColor;
-            else 
+            }
+            else{
                 pathLabel.style.backgroundColor = defaultBackgroundColor;
+            }
             pathLabel.style.width = columnWidth;
-            pathLabel.RegisterCallback<MouseUpEvent>((evt) => { Selection.activeObject = scriptableObjectData.scriptableObjectInstance; });
+            pathLabel.RegisterCallback<MouseUpEvent>(evt => {
+                Selection.activeObject = scriptableObjectData.scriptableObjectInstance;
+            });
 
             scriptableObjectInstanceRow.Add(pathLabel);
-            for(int i = 0; i < scriptableObjectData.fields.Count; i++)
-            {
-                VisualElement element = MakeVisualElementForValue(scriptableObjectData.fields[i].GetValue(scriptableObjectData.scriptableObjectInstance));
-                string fieldName = scriptableObjectData.fields[i].Name;
-                if(element is Label)
-                {
-                    element.RegisterCallback<MouseUpEvent>((evt) => { Selection.activeObject = scriptableObjectData.scriptableObjectInstance; });
+            for (var i = 0; i < scriptableObjectData.fields.Count; i++){
+                var element = MakeVisualElementForValue(scriptableObjectData.fields[i]
+                    .GetValue(scriptableObjectData.scriptableObjectInstance));
+                var fieldName = scriptableObjectData.fields[i].Name;
+                if (element is Label){
+                    element.RegisterCallback<MouseUpEvent>(evt => {
+                        Selection.activeObject = scriptableObjectData.scriptableObjectInstance;
+                    });
                 }
                 element.tooltip = scriptableObjectData.fields[i].Name;
-                
-                SerializedObject so = new SerializedObject(scriptableObjectData.scriptableObjectInstance);
 
-                if(element is IBindable)
-                {
-                    SerializedProperty property = so.FindProperty(scriptableObjectData.fields[i].Name);
-                    if(property != null)
+                var so = new SerializedObject(scriptableObjectData.scriptableObjectInstance);
+
+                if (element is IBindable){
+                    var property = so.FindProperty(scriptableObjectData.fields[i].Name);
+                    if (property != null){
                         ((IBindable)element).BindProperty(property);
-                    else 
-                        UnityEngine.Debug.LogWarning("Could not find property " + scriptableObjectData.fields[i].Name + " on " + scriptableObjectData.scriptableObjectInstance.name);
+                    }
+                    else{
+                        Debug.LogWarning("Could not find property " + scriptableObjectData.fields[i].Name + " on " +
+                                         scriptableObjectData.scriptableObjectInstance.name);
+                    }
                 }
-                
+
                 element.style.width = columnWidths[i];
 
                 //set background of every second column to grey
-                if(colorRowGrey)
-                {
+                if (colorRowGrey){
                     element.style.backgroundColor = greyBackgroundColor;
                     //get children and change their background color
-                    foreach(VisualElement child in element.Children())
-                    {
+                    foreach (var child in element.Children()){
                         child.style.backgroundColor = greyBackgroundColor;
                         //get children and change their background color
-                        foreach(VisualElement grandChild in child.Children())
-                        {
+                        foreach (var grandChild in child.Children())
                             grandChild.style.backgroundColor = greyBackgroundColor;
-                        }
                     }
                 }
-                else 
-                {
+                else{
                     element.style.backgroundColor = defaultBackgroundColor;
                     //get children and change their background color
-                    foreach(VisualElement child in element.Children())
-                    {
+                    foreach (var child in element.Children()){
                         child.style.backgroundColor = defaultBackgroundColor;
                         //get children and change their background color
-                        foreach(VisualElement grandChild in child.Children())
-                        {
+                        foreach (var grandChild in child.Children())
                             grandChild.style.backgroundColor = defaultBackgroundColor;
-                        }
                     }
                 }
-                
+
                 scriptableObjectInstanceRow.Add(element);
             }
         }
 
-        VisualElement MakeVisualElementForValue(dynamic value)
-        {
+        VisualElement MakeVisualElementForValue(dynamic value){
             VisualElement visualElement;
-            if ((object)value != null)
+            if ((object)value != null){
                 visualElement = new Label(value.ToString());
-            else 
-            {
+            }
+            else{
                 value = null;
                 visualElement = new Label("null");
             }
-            if(value.GetType() == typeof(UnityEngine.Color) || value.GetType() == typeof(UnityEngine.Color32))
-            {
+            if (value.GetType() == typeof(Color) || value.GetType() == typeof(Color32)){
                 visualElement = new ColorField();
                 ((ColorField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.Vector2))
-            {
+            if (value.GetType() == typeof(Vector2)){
                 visualElement = new Vector2Field();
                 ((Vector2Field)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.Vector3))
-            {
+            if (value.GetType() == typeof(Vector3)){
                 visualElement = new Vector3Field();
                 ((Vector3Field)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.Vector4))
-            {
+            if (value.GetType() == typeof(Vector4)){
                 visualElement = new Vector4Field();
                 ((Vector4Field)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.Rect))
-            {
+            if (value.GetType() == typeof(Rect)){
                 visualElement = new RectField();
                 ((RectField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.Bounds))
-            {
+            if (value.GetType() == typeof(Bounds)){
                 visualElement = new BoundsField();
                 ((BoundsField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.Transform) || value.GetType() == typeof(UnityEngine.Object) || 
-               value.GetType() == typeof(UnityEngine.GameObject) || value.GetType() == typeof(UnityEngine.Component) || 
-               value.GetType().IsSubclassOf(typeof(ScriptableObject)) || value.GetType() == typeof(Sprite))
-            {
+            if (value.GetType() == typeof(Transform) || value.GetType() == typeof(Object) ||
+                value.GetType() == typeof(GameObject) || value.GetType() == typeof(Component) ||
+                value.GetType().IsSubclassOf(typeof(ScriptableObject)) || value.GetType() == typeof(Sprite)){
                 visualElement = new ObjectField();
                 ((ObjectField)visualElement).objectType = value.GetType();
                 ((ObjectField)visualElement).SetValueWithoutNotify(value);
                 ((ObjectField)visualElement).allowSceneObjects = false;
             }
-            if(value.GetType() == typeof(UnityEngine.AnimationCurve))
-            {
+            if (value.GetType() == typeof(AnimationCurve)){
                 visualElement = new CurveField();
                 ((CurveField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.Gradient))
-            {
+            if (value.GetType() == typeof(Gradient)){
                 visualElement = new GradientField();
                 ((GradientField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.LayerMask))
-            {
+            if (value.GetType() == typeof(LayerMask)){
                 visualElement = new LayerMaskField();
                 ((LayerMaskField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.RectInt))
-            {
+            if (value.GetType() == typeof(RectInt)){
                 visualElement = new RectIntField();
                 ((RectIntField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(UnityEngine.BoundsInt))
-            {
+            if (value.GetType() == typeof(BoundsInt)){
                 visualElement = new BoundsIntField();
                 ((BoundsIntField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(Enum) || value.GetType().IsEnum)
-            {
+            if (value.GetType() == typeof(Enum) || value.GetType().IsEnum){
                 visualElement = new EnumField();
                 ((EnumField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(bool))
-            {
+            if (value.GetType() == typeof(bool)){
                 visualElement = new Toggle();
                 ((Toggle)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(int))
-            {
+            if (value.GetType() == typeof(int)){
                 visualElement = new IntegerField();
                 ((IntegerField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(float))
-            {
+            if (value.GetType() == typeof(float)){
                 visualElement = new FloatField();
                 ((FloatField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(double))
-            {
+            if (value.GetType() == typeof(double)){
                 visualElement = new DoubleField();
                 ((DoubleField)visualElement).SetValueWithoutNotify(value);
             }
-            if(value.GetType() == typeof(string) || value.GetType() == typeof(String) || value.GetType() == typeof(char))
-            {
+            if (value.GetType() == typeof(string) || value.GetType() == typeof(string) ||
+                value.GetType() == typeof(char)){
                 visualElement = new TextField();
                 ((TextField)visualElement).SetValueWithoutNotify(value);
             }
-            
+
             return visualElement;
         }
 
 
-
-        public static Type GetTypeFromName(string name)
-        {
+        public static Type GetTypeFromName(string name){
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
+            foreach (var assembly in assemblies){
                 var tt = assembly.GetType(name);
-                if (tt != null)
-                {
+                if (tt != null){
                     return tt;
                 }
             }
-            UnityEngine.Debug.LogError("Type not found: " + name);
+            Debug.LogError("Type not found: " + name);
 
             return null;
         }
 
-        List<ScriptableObjectData> GetScriptableObjectDataList(ScriptableObject scriptableObject)
-        {
-            Type ScriptableObjectType = GetTypeFromName(scriptableObject.GetType().FullName);
+        List<ScriptableObjectData> GetScriptableObjectDataList(ScriptableObject scriptableObject){
+            var ScriptableObjectType = GetTypeFromName(scriptableObject.GetType().FullName);
             var fields = GetFieldsToDisplay(scriptableObject);
-            
-            List<ScriptableObjectData> scriptableObjectDataList = new List<ScriptableObjectData>();
+
+            var scriptableObjectDataList = new List<ScriptableObjectData>();
             var scriptableObjectPaths = AssetDatabase.FindAssets("t:" + scriptableObject.GetType().FullName);
-            foreach (var scriptableObjectPath in scriptableObjectPaths)
-            {
-                ScriptableObjectData scriptableObjectData = new ScriptableObjectData();
+            foreach (var scriptableObjectPath in scriptableObjectPaths){
+                var scriptableObjectData = new ScriptableObjectData();
                 scriptableObjectData.name = AssetDatabase.GUIDToAssetPath(scriptableObjectPath);
                 scriptableObjectData.type = ScriptableObjectType.ToString();
                 scriptableObjectData.path = AssetDatabase.GUIDToAssetPath(scriptableObjectPath);
-                scriptableObjectData.scriptableObjectInstance = (ScriptableObject)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(scriptableObjectPath), ScriptableObjectType);
+                scriptableObjectData.scriptableObjectInstance =
+                    (ScriptableObject)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(scriptableObjectPath),
+                        ScriptableObjectType);
 
                 scriptableObjectData.fields.AddRange(fields);
-                
+
                 scriptableObjectDataList.Add(scriptableObjectData);
             }
 
             return scriptableObjectDataList;
         }
 
-        List<FieldInfo> GetFieldsToDisplay(ScriptableObject scriptableObject)
-        {
-            Type ScriptableObjectType = GetTypeFromName(scriptableObject.GetType().FullName);
+        List<FieldInfo> GetFieldsToDisplay(ScriptableObject scriptableObject){
+            var ScriptableObjectType = GetTypeFromName(scriptableObject.GetType().FullName);
             var scriptableObjectPaths = AssetDatabase.FindAssets("t:" + scriptableObject.GetType().FullName);
-            var scriptableObjectInstance = (ScriptableObject)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(scriptableObjectPaths[0]), ScriptableObjectType);
-            
-            List<FieldInfo> fields = new List<FieldInfo>(ScriptableObjectType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public));
+            var scriptableObjectInstance =
+                (ScriptableObject)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(scriptableObjectPaths[0]),
+                    ScriptableObjectType);
+
+            var fields =
+                new List<FieldInfo>(ScriptableObjectType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic |
+                                                                   BindingFlags.Public));
             //remove fields that are not supported
-            List<FieldInfo> invalidFieldsRemoved = new List<FieldInfo>(fields);
+            var invalidFieldsRemoved = new List<FieldInfo>(fields);
             showWarningForUndisplayedFields = false;
-            foreach(var field in fields)
-            {
-                SerializedObject so = new SerializedObject(scriptableObjectInstance);
-                SerializedProperty property = so.FindProperty(field.Name);
-                if(property == null)
-                {
+            foreach (var field in fields){
+                var so = new SerializedObject(scriptableObjectInstance);
+                var property = so.FindProperty(field.Name);
+                if (property == null){
                     showWarningForUndisplayedFields = true;
                     invalidFieldsRemoved.Remove(field);
                 }
-                else if(hideReadOnlyFields)
-                {
-                    if(field.IsInitOnly)
-                    {
+                else if (hideReadOnlyFields){
+                    if (field.IsInitOnly){
                         invalidFieldsRemoved.Remove(field);
                     }
-                    if(MakeVisualElementForValue(field.GetValue(scriptableObjectInstance)) is Label)
-                    {
+                    if (MakeVisualElementForValue(field.GetValue(scriptableObjectInstance)) is Label){
                         invalidFieldsRemoved.Remove(field);
                     }
                 }
-
-                    
             }
-                
-            return invalidFieldsRemoved;
 
+            return invalidFieldsRemoved;
         }
-        void ForceUpdateScrollViewScale()
-        {
+
+        void ForceUpdateScrollViewScale(){
             //this is a hack-fix for a bug in the scrollview where it doesn't update the scrollbars when the scale changes.
             //https://forum.unity.com/threads/how-to-refresh-scrollview-scrollbars-to-reflect-changed-content-width-and-height.1260920/
             //https://issuetracker.unity3d.com/issues/uitoolkit-scrollview-scroll-bars-arent-refreshed-after-changing-its-size
-            var new_len = new StyleLength(UnityEngine.UIElements.Length.Percent(scale_swap ? 99.9f : 100f));
-            ScrollView scroll_view = rootVisualElement.Q<ScrollView>();
+            var new_len = new StyleLength(Length.Percent(scale_swap ? 99.9f : 100f));
+            var scroll_view = rootVisualElement.Q<ScrollView>();
             scroll_view.style.width = new_len;
             scroll_view.style.height = new_len;
             scale_swap = !scale_swap;

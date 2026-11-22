@@ -4,7 +4,7 @@ using UnityEngine;
 
 public abstract class ObjectRoot<T> : MonoBehaviour where T : MonoBehaviour{
     readonly Dictionary<Type, object> _componentsCache = new();
-    
+
     public event Action onStructureChanged;
 
     public T1 GetPart<T1>() where T1 : T{
@@ -37,7 +37,7 @@ public abstract class ObjectRoot<T> : MonoBehaviour where T : MonoBehaviour{
         _componentsCache.Clear();
         onStructureChanged?.Invoke();
     }
-    
+
     public T1 AddPart<T1>() where T1 : T{
         var part = gameObject.AddComponent<T1>();
         OnPartAdded(part);

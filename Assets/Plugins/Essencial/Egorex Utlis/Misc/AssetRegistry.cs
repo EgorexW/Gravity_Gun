@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -12,19 +13,23 @@ public abstract class AssetRegistryBase : ScriptableObject{
 #endif
 }
 
-public abstract class AssetRegistry<T> : AssetRegistryBase where T : UnityEngine.Object{
+public abstract class AssetRegistry<T> : AssetRegistryBase where T : Object{
     [SerializeField] protected List<AssetRegistryEntry<T>> entries = new();
 
     public string GetGuid(T asset){
         foreach (var entry in entries)
-            if (entry.asset == asset) return entry.guid;
+            if (entry.asset == asset){
+                return entry.guid;
+            }
         Debug.LogWarning($"{typeof(T).Name} '{asset.name}' is not registered in {name}.");
         return null;
     }
 
     public T GetAsset(string guid){
         foreach (var entry in entries)
-            if (entry.guid == guid) return entry.asset;
+            if (entry.guid == guid){
+                return entry.asset;
+            }
         Debug.LogWarning($"No {typeof(T).Name} registered in {name} for guid {guid}.");
         return null;
     }
@@ -33,7 +38,9 @@ public abstract class AssetRegistry<T> : AssetRegistryBase where T : UnityEngine
     protected virtual void OnValidate(){
         for (var i = 0; i < entries.Count; i++){
             var entry = entries[i];
-            if (entry.asset == null) continue;
+            if (entry.asset == null){
+                continue;
+            }
             entry.guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(entry.asset));
             entries[i] = entry;
         }
@@ -44,15 +51,21 @@ public abstract class AssetRegistry<T> : AssetRegistryBase where T : UnityEngine
 
     // Override to narrow down which assets found by AssetSearchFilter actually belong in this registry,
     // eg. only prefabs that carry a specific component.
-    protected virtual bool IsValidAsset(T asset) => true;
+    protected virtual bool IsValidAsset(T asset){
+        return true;
+    }
 
     [Button("Refresh From Project")]
     public override void RefreshFromProject(){
         entries.RemoveAll(entry => entry.asset == null);
         foreach (var guid in AssetDatabase.FindAssets(AssetSearchFilter)){
             var asset = AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guid));
-            if (asset == null || !IsValidAsset(asset)) continue;
-            if (entries.Exists(entry => entry.asset == asset)) continue;
+            if (asset == null || !IsValidAsset(asset)){
+                continue;
+            }
+            if (entries.Exists(entry => entry.asset == asset)){
+                continue;
+            }
             entries.Add(new AssetRegistryEntry<T>{ asset = asset });
         }
         OnValidate();
@@ -62,7 +75,7 @@ public abstract class AssetRegistry<T> : AssetRegistryBase where T : UnityEngine
 }
 
 [Serializable]
-public struct AssetRegistryEntry<T> where T : UnityEngine.Object{
+public struct AssetRegistryEntry<T> where T : Object{
     public T asset;
     [ReadOnly] public string guid;
 }

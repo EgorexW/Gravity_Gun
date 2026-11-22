@@ -1,11 +1,10 @@
-using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class GravityBend : MonoBehaviour{
     static int BulletsLayer => LayerMask.GetMask("Bullets");
-    
+
     [SerializeField] float strength = 2;
     [SerializeField] float range = 5;
 
@@ -30,14 +29,13 @@ public class GravityBend : MonoBehaviour{
                 continue;
             }
             var dir = pos - (Vector2)bullet.transform.position;
-            var mult = 1 - Mathf.InverseLerp(0,  range, dir.magnitude);
+            var mult = 1 - Mathf.InverseLerp(0, range, dir.magnitude);
             var pullValue = strength * mult * Time.fixedDeltaTime;
             var pull = pullValue * dir.normalized;
-                
+
             bullet.Pull(pull);
         }
-        
+
         onHold.Invoke(pos);
     }
-
 }

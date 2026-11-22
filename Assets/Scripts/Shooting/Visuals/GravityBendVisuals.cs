@@ -1,10 +1,8 @@
-using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public class GravityBendVisuals : MonoBehaviour
-{
-    [BoxGroup("References")][Required][SerializeField] GravityBend gravityBend;
+public class GravityBendVisuals : MonoBehaviour{
+    [BoxGroup("References")] [Required] [SerializeField] GravityBend gravityBend;
 
     [BoxGroup("References")] [Required] [SerializeField] GameObject visualObject;
 

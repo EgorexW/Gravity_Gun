@@ -38,9 +38,9 @@ public static class DirectionExtensions{
             _ => direction
         };
     }
-    
+
     public static Direction Random(this Direction direction){
-        return (UnityEngine.Random.Range(0, 4)) switch{
+        return UnityEngine.Random.Range(0, 4) switch{
             0 => Direction.Left,
             1 => Direction.Right,
             2 => Direction.Up,

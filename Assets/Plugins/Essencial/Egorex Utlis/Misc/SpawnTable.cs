@@ -6,23 +6,20 @@ using UnityEngine;
 [InlineEditor]
 public class SpawnTable : ScriptableObject{
     [SerializeField] List<ObjectWithValue<Object>> gameObjects;
-    [SerializeField] bool allowEmpty = false;
+    [SerializeField] bool allowEmpty;
 
     [ShowInInspector]
     [ReadOnly]
-    public float TotalWeight
-    {
-        get
-        {
-            if (gameObjects == null) return 0f;
-            float total = 0f;
+    public float TotalWeight{
+        get{
+            if (gameObjects == null){
+                return 0f;
+            }
+            var total = 0f;
             foreach (var item in gameObjects)
-            {
-                if (item != null)
-                {
+                if (item != null){
                     total += Mathf.Max(item.value, 0f);
                 }
-            }
             return total;
         }
     }
@@ -30,14 +27,14 @@ public class SpawnTable : ScriptableObject{
     public GameObject GetGameObject(){
         return GetAsset<GameObject>();
     }
-    
+
     public List<T> GetAssets<T>() where T : Object{
         var assets = new List<T>();
         var visited = new HashSet<SpawnTable>{ this };
         var toProcess = new Queue<SpawnTable>();
         toProcess.Enqueue(this);
-        while (toProcess.Count > 0){
-            foreach (var item in toProcess.Dequeue().gameObjects){
+        while (toProcess.Count > 0)
+            foreach (var item in toProcess.Dequeue().gameObjects)
                 if (item.Object is SpawnTable nestedTable){
                     if (visited.Add(nestedTable)){
                         toProcess.Enqueue(nestedTable);
@@ -46,8 +43,6 @@ public class SpawnTable : ScriptableObject{
                 else if (item.Object is T castedObj && !assets.Contains(castedObj)){
                     assets.Add(castedObj);
                 }
-            }
-        }
         return assets;
     }
 

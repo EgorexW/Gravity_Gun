@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class MyExtentions{
     /// <summary>
-    /// Shuffles the elements of the list in place using the Fisher-Yates algorithm.
+    ///     Shuffles the elements of the list in place using the Fisher-Yates algorithm.
     /// </summary>
     /// <typeparam name="T">The type of elements in the list.</typeparam>
     /// <param name="list">The list to shuffle.</param>
@@ -18,32 +18,30 @@ public static class MyExtentions{
     }
 
     /// <summary>
-    /// Returns a random element from the read-only list.
+    ///     Returns a random element from the read-only list.
     /// </summary>
     /// <typeparam name="T">The type of elements in the list.</typeparam>
     /// <param name="collection">The IEnumerable to select from.</param>
-    /// <returns>A random element of type <typeparamref name="T"/>, or default if the list is empty.</returns>
-    public static T Random<T>(this IEnumerable<T> collection)
-    {
+    /// <returns>A random element of type <typeparamref name="T" />, or default if the list is empty.</returns>
+    public static T Random<T>(this IEnumerable<T> collection){
         // Enumerable.Any() is safer for generic IEnumerables than checking Count
-        if (collection == null || !collection.Any())
-        {
+        if (collection == null || !collection.Any()){
             Debug.LogWarning("Trying to get random element from empty or null collection");
             return default;
         }
 
-        int count = collection.Count();
-        int index = UnityEngine.Random.Range(0, count);
-        
+        var count = collection.Count();
+        var index = UnityEngine.Random.Range(0, count);
+
         return collection.ElementAt(index);
     }
 
     /// <summary>
-    /// Selects a random key from the dictionary based on its float weight value.
+    ///     Selects a random key from the dictionary based on its float weight value.
     /// </summary>
     /// <typeparam name="T">The type of keys in the dictionary.</typeparam>
     /// <param name="list">The dictionary containing elements and their corresponding float weights.</param>
-    /// <returns>The selected key of type <typeparamref name="T"/>, or default if selection fails.</returns>
+    /// <returns>The selected key of type <typeparamref name="T" />, or default if selection fails.</returns>
     public static T WeightedRandom<T>(this Dictionary<T, float> list){
         var totalWeight = 0f;
 
@@ -64,11 +62,11 @@ public static class MyExtentions{
     }
 
     /// <summary>
-    /// Selects a random key from the dictionary based on its integer weight value.
+    ///     Selects a random key from the dictionary based on its integer weight value.
     /// </summary>
     /// <typeparam name="T">The type of keys in the dictionary.</typeparam>
     /// <param name="list">The dictionary containing elements and their corresponding integer weights.</param>
-    /// <returns>The selected key of type <typeparamref name="T"/>, or default if selection fails.</returns>
+    /// <returns>The selected key of type <typeparamref name="T" />, or default if selection fails.</returns>
     public static T WeightedRandom<T>(this Dictionary<T, int> list){
         var totalWeight = 0;
 
@@ -90,17 +88,17 @@ public static class MyExtentions{
     }
 
     /// <summary>
-    /// Creates and returns a new list containing the same elements as the read-only list.
+    ///     Creates and returns a new list containing the same elements as the read-only list.
     /// </summary>
     /// <typeparam name="T">The type of elements in the list.</typeparam>
     /// <param name="list">The read-only list to copy.</param>
-    /// <returns>A new list of type <see cref="List{T}"/> containing the elements of the source list.</returns>
+    /// <returns>A new list of type <see cref="List{T}" /> containing the elements of the source list.</returns>
     public static List<T> Copy<T>(this IReadOnlyList<T> list){
         return new List<T>(list);
     }
 
     /// <summary>
-    /// Returns a random float between the x (inclusive) and y (inclusive) components of the Vector2.
+    ///     Returns a random float between the x (inclusive) and y (inclusive) components of the Vector2.
     /// </summary>
     /// <param name="vector">The Vector2 containing the min (x) and max (y) values.</param>
     /// <returns>A random float value.</returns>
@@ -109,7 +107,7 @@ public static class MyExtentions{
     }
 
     /// <summary>
-    /// Returns a random integer between the x (inclusive) and y (inclusive) components of the Vector2Int.
+    ///     Returns a random integer between the x (inclusive) and y (inclusive) components of the Vector2Int.
     /// </summary>
     /// <param name="vector">The Vector2Int containing the min (x) and max (y) values.</param>
     /// <returns>A random integer value.</returns>

@@ -1,4 +1,3 @@
-using System;
 using Nrjwolf.Tools.AttachAttributes;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -6,17 +5,15 @@ using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerInput))]
-public class InputHandler : MonoBehaviour
-{
+public class InputHandler : MonoBehaviour{
     [GetComponent] [SerializeField] PlayerInput playerInput;
 
     [FormerlySerializedAs("characterMovement")] [BoxGroup("References")] [Required] [SerializeField] Movement movement;
     [BoxGroup("References")] [Required] [SerializeField] Looking looking;
     [BoxGroup("References")] [Required] [SerializeField] Gun gun;
-    [BoxGroup("References")][Required][SerializeField] GravityBend bend;
+    [BoxGroup("References")] [Required] [SerializeField] GravityBend bend;
 
-    void Awake()
-    {
+    void Awake(){
         playerInput.onActionTriggered += OnActionTriggered;
     }
 
@@ -24,8 +21,7 @@ public class InputHandler : MonoBehaviour
         bend.pos = General.GetMouseWorldPos();
     }
 
-    void OnActionTriggered(InputAction.CallbackContext obj)
-    {
+    void OnActionTriggered(InputAction.CallbackContext obj){
         if (obj.action.actionMap.name != "Player"){
             return;
         }
@@ -56,15 +52,13 @@ public class InputHandler : MonoBehaviour
         gun.constantFire = obj.performed;
     }
 
-    void OnTargetPerformed(InputAction.CallbackContext obj)
-    {
+    void OnTargetPerformed(InputAction.CallbackContext obj){
         var lookPoint = obj.ReadValue<Vector2>();
         lookPoint = General.GetMouseWorldPos(lookPoint);
         looking.SetTarget(lookPoint);
     }
 
-    void OnMovePerformed(InputAction.CallbackContext obj)
-    {
+    void OnMovePerformed(InputAction.CallbackContext obj){
         var inputVector = obj.ReadValue<Vector2>();
         movement.SetMovementInput(inputVector);
     }

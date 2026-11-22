@@ -4,7 +4,7 @@ using UnityEngine;
 public class Looking : MonoBehaviour{
     [BoxGroup("References")] [Required] [SerializeField] Rigidbody2D rb;
     Vector2 lookPoint;
-    
+
     void FixedUpdate(){
         UpdateRotation();
     }

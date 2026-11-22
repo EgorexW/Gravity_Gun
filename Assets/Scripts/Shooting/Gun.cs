@@ -1,15 +1,14 @@
-using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
 public class Gun : MonoBehaviour{
-    [BoxGroup("References")][Required][SerializeField] GameObject bulletPrefab;
-    
+    [BoxGroup("References")] [Required] [SerializeField] GameObject bulletPrefab;
+
     [SerializeField] float cooldown = 1f;
 
-    float lastShootTime = 0f;
-    
-    public bool constantFire = false;
+    float lastShootTime;
+
+    public bool constantFire;
 
     void Update(){
         if (constantFire){
@@ -21,8 +20,8 @@ public class Gun : MonoBehaviour{
         if (lastShootTime + cooldown > Time.time){
             return;
         }
-        lastShootTime  = Time.time;
-        
+        lastShootTime = Time.time;
+
         Instantiate(bulletPrefab, transform.position, transform.rotation);
     }
 }

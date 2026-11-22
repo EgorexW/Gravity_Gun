@@ -1,21 +1,19 @@
-using System;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Serialization;
-using Random = UnityEngine.Random;
 
 public class Bullet : MonoBehaviour{
     const float PASS_THROUGH_TIME = 0.05f;
     const float STOPPED_MAGNITUDE = 0.1f;
-    
-    [BoxGroup("References")][Required][SerializeField] Rigidbody2D rb;
+
+    [BoxGroup("References")] [Required] [SerializeField] Rigidbody2D rb;
 
     [FormerlySerializedAs("speed")] [FormerlySerializedAs("velocity")] [SerializeField] float startSpeed = 10;
     [SerializeField] int maxBounces = 2;
     [SerializeField] float damage = 1;
     [SerializeField] float lifetime = 10;
-    
-    int bounces = 0;
+
+    int bounces;
     float startTime;
     // Vector2 dir;
 
@@ -27,21 +25,20 @@ public class Bullet : MonoBehaviour{
     void Start(){
         rb.linearVelocity = transform.up * startSpeed;
     }
-    
+
     void Update(){
         transform.up = rb.linearVelocity.normalized;
-    //     if (rb.linearVelocity.magnitude <= STOPPED_MAGNITUDE){
-    //         Destroy(gameObject);
-    //     }
+        //     if (rb.linearVelocity.magnitude <= STOPPED_MAGNITUDE){
+        //         Destroy(gameObject);
+        //     }
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
-    {
+    void OnCollisionEnter2D(Collision2D collision){
         if (Time.time - startTime < PASS_THROUGH_TIME){
             return;
         }
         var avgNormal = Vector2.zero;
-        bool damaged = false;
+        var damaged = false;
         foreach (var contact in collision.contacts){
             if (!damaged && contact.collider.gameObject.TryGetComponent<Damageable>(out var damageable)){
                 damageable.Damage(damage);
@@ -54,8 +51,7 @@ public class Bullet : MonoBehaviour{
             Destroy(gameObject);
             return;
         }
-        if (collision.contactCount > 1){
-        }
+        if (collision.contactCount > 1){ }
         var dir = Vector2.Reflect(-collision.relativeVelocity.normalized, avgNormal);
         rb.linearVelocity = dir.normalized * collision.relativeVelocity.magnitude;
         bounces++;
